@@ -11,7 +11,7 @@ const fetch = require('../utils/fetch')
 const formatHTML = ($) => {
   const $selectList = $('.can-select')
   if (!$selectList || !$selectList.length) {
-    throw Error('无空余场地')
+    throw Error('整场均无空余场地')
   }
   const $hallList = Array.prototype.map.call($selectList, ({ attribs }) => {
     const start = attribs['data-start']
@@ -54,11 +54,14 @@ const queryHallHtml = async () => {
 /**
  * 渲染一下下单页面
  */
-const renderOrderConfirmView = (param) => {
-  return fetch.get(`/wechat/order/index?${ qs.stringify({
+const renderOrderConfirmView = async (param) => {
+  const { data: html } = await fetch.get(`/wechat/order/index?${ qs.stringify({
     show_id: hallId,
     param,
   }) }`)
+  if (!html || !html.includes(hallId)) {
+    throw Error('微信授权出现问题')
+  }
 }
 
 /**
@@ -79,10 +82,11 @@ const createOrderSignRandomStr = async () => {
     total_fee: `${ money }元`,
   }
   const { data: response } = await fetch.post('/wechat/product/save', qs.stringify(data))
-  if (!response || !response.msg) {
-    throw Error('生成订单签名失败')
+  const { code = -1, msg = '生成订单签名失败' } = response && response instanceof Object ? response : {}
+  if (code !== 0) {
+    throw Error(msg)
   }
-  return response.msg
+  return msg
 }
 
 /**
@@ -90,14 +94,15 @@ const createOrderSignRandomStr = async () => {
  */
 module.exports = async () => {
   const param = await createOrderSignRandomStr()
-  // await renderOrderConfirmView(param)
+  await renderOrderConfirmView(param)
   const data = Object.assign({}, userInfo, {
     show_id: hallId,
     param,
   })
   const { data: response } = await fetch.post('/wechat/order/add', qs.stringify(data))
-  if (!response || !(response instanceof Object)) {
-    throw Error(`订单生成失败(${ response })`)
+  const { code = -1, msg = '微信授权出现问题' } = response && response instanceof Object ? response : {}
+  if (code !== 0) {
+    throw Error(msg)
   }
-  return response
+  return '生成订单成功'
 }
