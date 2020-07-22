@@ -35,7 +35,7 @@ const formatHTML = ($) => {
  * 获取页面html
  */
 const queryHallHtml = async () => {
-  const { data: html } = await fetch.get(`/wechat/product/details?${
+  const html = await fetch.get(`/wechat/product/details?${
     qs.stringify({
       id: hallId,
       time: (new Date(`${ time } 00:00:00`).getTime()) / 1000,
@@ -55,7 +55,7 @@ const queryHallHtml = async () => {
  * 渲染一下下单页面
  */
 const renderOrderConfirmView = async (param) => {
-  const { data: html } = await fetch.get(`/wechat/order/index?${ qs.stringify({
+  const html = await fetch.get(`/wechat/order/index?${ qs.stringify({
     show_id: hallId,
     param,
   }) }`)
@@ -81,8 +81,7 @@ const createOrderSignRandomStr = async () => {
     money,
     total_fee: `${ money }元`,
   }
-  const { data: response } = await fetch.post('/wechat/product/save', qs.stringify(data))
-  const { code = -1, msg = '生成订单签名失败' } = response && response instanceof Object ? response : {}
+  const { code = -1, msg = '生成订单签名失败' } = await fetch.post('/wechat/product/save', qs.stringify(data))
   if (code !== 0) {
     throw Error(msg)
   }
@@ -99,8 +98,7 @@ module.exports = async () => {
     show_id: hallId,
     param,
   })
-  const { data: response } = await fetch.post('/wechat/order/add', qs.stringify(data))
-  const { code = -1, msg = '微信授权出现问题' } = response && response instanceof Object ? response : {}
+  const { code = -1, msg = '微信授权出现问题' } = await fetch.post('/wechat/order/add', qs.stringify(data))
   if (code !== 0) {
     throw Error(msg)
   }
