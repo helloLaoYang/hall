@@ -1,0 +1,17 @@
+{
+  "name": "hall",
+  "version": "1.0.0",
+  "description": "西湖区文体中心抢场地脚本",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "cheerio": "^1.0.0-rc.3",
+    "colors": "^1.4.0",
+    "inquirer": "^7.3.2",
+    "ora": "^4.0.5"
+  }
+}
